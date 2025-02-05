@@ -70,7 +70,7 @@ namespace Library_Management_System.Entities
                         .Include(x => x.Books)
                         .FirstOrDefault(x => x.Id == id);
 
-                    Console.Write("Enter Book Title : ");
+                    Console.Write("\n\nEnter Book Title : ");
                     var title = Console.ReadLine();
 
                     if (Auth.Books.Any(x => x.Title == title))

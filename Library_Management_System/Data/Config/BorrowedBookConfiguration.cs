@@ -13,8 +13,8 @@ namespace Library_Management_System.Data.Config
 
             builder.Property(x => x.BorrowDate)
                    .HasConversion(
-                         v => v.ToDateTime(TimeOnly.MinValue),  // تحويل DateOnly إلى DateTime عند الحفظ
-                         v => DateOnly.FromDateTime(v)         // تحويل DateTime إلى DateOnly عند الاسترجاع
+                         v => v.ToDateTime(TimeOnly.MinValue), 
+                         v => DateOnly.FromDateTime(v)         
                    )
                    .HasColumnType("DATE");
 

@@ -13,7 +13,7 @@ namespace Library_Management_System.Entities
         public string FullName => $"{FName} {LName}";
         public ICollection<Book> Books { get; set; } = new List<Book>();
 
-        public void Add_Author(string Fname,string Lname)
+        public static void Add_Author(string Fname,string Lname)
         {
             using (var context = new AppDbContext())
             {
@@ -76,7 +76,7 @@ namespace Library_Management_System.Entities
                         .Include(x => x.Books)
                         .FirstOrDefault(x => x.Id == id);
 
-                    Console.WriteLine($"\nID : {author.Id,-3}, Name : {author.FullName,-17} ");
+                    Console.WriteLine($"\n\nID : {author.Id,-3}, Name : {author.FullName,-17} ");
 
                     Console.WriteLine("\n\t\t┌---------┬------------┬-------------┐");
                     Console.WriteLine($"\t\t│ Book Id │ Book title │ Is borrowed │");
