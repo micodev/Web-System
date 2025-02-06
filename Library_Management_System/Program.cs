@@ -1,513 +1,221 @@
 ﻿using Library_Management_System.Data;
 using Library_Management_System.Entities;
+using Library_Management_System.Repository.Implementaion;
+using Library_Management_System.Repository.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using Microsoft.Identity.Client;
 
 namespace Library_Management_System
 {
-    class Program
+    public class Program
     {
+        private readonly IAuthorService _authorService;
+        private readonly IBookService _bookService;
+        private readonly IBorrowerService _borrowerService;
+
+        public Program(IAuthorService authorService, IBookService bookService, IBorrowerService borrowerService)
+        {
+            _authorService = authorService;
+            _bookService = bookService;
+            _borrowerService = borrowerService;
+        }
+
         static void Main()
         {
-
-            #region Author
-
-            // Addauthor()
-
-            // viewAuthors();
-
-            // Updateauthor();
-
-            // UpdateauthorBooks();
-
-            // Deleteauthor(); 
-
-            #endregion
-
-            #region Book
-
-            // Book.Add_Books(); 
-
-            // Add_Books();
-
-            // Book.View_Books();
-
-            // update_book();
-
-            // delete_book();
-
-            #endregion
-
-            #region Borrower
-
-            // Addborrower();
-
-            // Registerborrower();
-
-            // Borrower.Get_Borrower();
-
-            // deleteborrower();
-
-            // Add_BorrowedBooks();
-
-            // returnbook();
-
-            // Borrower.Get_Borrower();
-
-            #endregion
-
-            #region BorrowedBooks
-
-            // BorrowedBook.View_Borrowed_Books();
-
-            #endregion
-
-            // Script();
-            
+            var context = new AppDbContext();
+            var authorService = new AuthorImplementation(context); // Initialize with actual implementation
+            var bookService = new BookImplementation(context); // Initialize with actual implementation
+            var borrowerService = new BorrowerImplementation(context); // Initialize with actual implementation
+            var program = new Program(authorService, bookService, borrowerService);
+            program.Script();
         }
 
-        #region Author_Methods
-
-        public static void Addauthor()
+        private void Script()
         {
-            using (var context = new AppDbContext())
+            bool exit = false;
+            while (!exit)
             {
-                var books = new List<Book>()
+                Console.WriteLine("\nSelect an option:");
+                Console.WriteLine("1. Add Author");
+                Console.WriteLine("2. Add Book");
+                Console.WriteLine("3. Link Borrow");
+                Console.WriteLine("4. Return Borrow");
+                Console.WriteLine("5. Show Books");
+                Console.WriteLine("6. Show Authors");
+                Console.WriteLine("7. Show Borrowers");
+                Console.WriteLine("8. Exit");
+                Console.Write("Enter your choice (1-5): ");
+                char choice = char.ToUpper(Console.ReadKey().KeyChar);
+                Console.WriteLine();
+
+                switch (choice)
                 {
-                    new Book
-                    {
-                        Title = "Book7"
-                    },
-                    new Book
-                    {
-                        Title = "Book8"
-                    },
-                    new Book
-                    {
-                        Title = "Book9"
-                    }
-                };
-
-                Author.Add_Author("Hamza", "Mahmoud", books);
-
-                Author.Get_Author();
-            }
-        }
-
-        public static int Addnewauthor()
-        {
-            using (var context = new AppDbContext())
-            {
-                Console.Write("\n\nEnter new first : ");
-                string Fname = Console.ReadLine();
-                Console.Write("\n\nEnter new last name : ");
-                string Lname = Console.ReadLine();
-
-                Author.Add_Author(Fname, Lname);
-
-                var id = context.Authors.FirstOrDefault(x => x.FName == Fname && x.LName == Lname).Id;
-                return id;
-            }
-        }
-
-        public static void Updateauthor()
-        {
-            Author.Get_Author();
-
-            Console.Write("\n\nEnter id of Author you want to update : ");
-            var id = Int32.Parse(Console.ReadLine());
-            Console.WriteLine();
-
-            Author.Get_Author(id);
-
-            Console.Write("\n\nEnter new first name of Author : ");
-            string fname = Console.ReadLine();
-            Console.Write("\n\nEnter new last name of Author : ");
-            string lname = Console.ReadLine();
-
-            var author = new Author();
-            author.Update_Author(id, fname, lname);
-
-            Console.WriteLine($"\nhere is new update \n");
-            Author.Get_Author(id);
-        }
-
-        public static void Updateauthor(int id)
-        {
-            Console.Write("\n\nEnter new first name of Author : ");
-            string fname = Console.ReadLine();
-            Console.Write("\nEnter new last name of Author : ");
-            string lname = Console.ReadLine();
-
-            var author = new Author();
-            author.Update_Author(id, fname, lname);
-
-            Console.WriteLine($"\nhere is new update \n");
-            Author.Get_Author(id);
-        }
-
-        public static void UpdateauthorBooks()
-        {
-            Author.Get_Author();
-
-            Console.Write("\n\nEnter id of Author you want to update : ");
-            var id = Int32.Parse(Console.ReadLine());
-            Console.WriteLine();
-
-            Author.Get_Author(id);
-
-            Console.Write("\nUpdate Author (A) or Books (B) , Enter your choice (A/B) : ");
-            char choice = (char)Console.ReadKey().Key;
-
-            switch (choice)
-            {
-                case 'A':
-                    Updateauthor(id);
-                    break;
-                case 'B':
-                    Console.Write("\n\nEnter id of Author Book you want to update : ");
-                    var bookid = Int32.Parse(Console.ReadLine());
-                    Author.Update_Author_Books(id, bookid);
-                    Author.Get_Author(id);
-                    break;
-                default:
-                    Console.WriteLine("Wrong choice");
-                    break;
-            }
-        }
-
-        public static void Deleteauthor()
-        {
-            Author.Get_Author();
-
-            Console.Write("\n\nEnter id of Author you want to delete : ");
-            var id = Int32.Parse(Console.ReadLine());
-
-            using (var context = new AppDbContext())
-            {
-                if (!context.Authors.Any(x => x.Id == id))
-                {
-                    Console.WriteLine($"\n\nthere is no author have id {id}");
-                    return;
+                    case '1':
+                        RegisterNewAuthor();
+                        break;
+                    case '2':
+                        RegisterNewBook();
+                        break;
+                    case '3':
+                        LinkBorrow();
+                        break;
+                    case '4':
+                        ReturnBorrow();
+                        break;
+                    case '5':
+                       ShowBooks();
+                        break;
+                    case '6':
+                        ShowAuthors();
+                        break;
+                    case '7':
+                        ShowBorrowers();
+                        break;
+                    case '8':
+                        exit = true;
+                        Console.WriteLine("Exiting the program.");
+                        break;
+                    default:
+                        Console.WriteLine("Sorry, invalid choice.");
+                        break;
                 }
             }
-
-            Console.WriteLine();
-            Author.Get_Author(id);
-
-            Console.Write("\n\nAre you sure you want to delete (Y/N) : ");
-            char sure = (char)Console.ReadKey().Key;
-
-            var author = new Author();
-            author.Delete_Author(id, sure);
-
-            Author.Get_Author();
+        }
+        public void ShowBooks()
+        {
+            _bookService.GetAllBooks();
+            Console.WriteLine("Books displayed successfully.");
+        }
+        public void ShowAuthors()
+        {
+            _authorService.GetAllAuthors();
+            Console.WriteLine("Authors displayed successfully.");
+        }
+        public void ShowBorrowers()
+        {
+            _borrowerService.GetAllBorrowers();
+            Console.WriteLine("Borrowers displayed successfully.");
+        }
+        private void RegisterNewBook()
+        {
+            string title = GetString("Enter Book Title: ");
+            int authorId = GetValidInt("Enter Author ID: ");
+            _bookService.AddBook(authorId, title);
+            Console.WriteLine("Book added successfully.");
         }
 
-        #endregion
-
-
-        #region Book_Methods
-        public static void Add_Books()
+        private void LinkBorrow()
         {
-            Author.Get_Author();
-
-            Console.Write("\nEnter id of author you want to add book for him : ");
-            var id = Convert.ToInt32(Console.ReadLine());
-
-            Book.Add_Books(id);
-
-            Author.Get_Author();
+            int borrowerId = GetValidInt("Enter Borrower ID: ");
+            int bookId = GetValidInt("Enter Book ID to Borrow: ");
+            _borrowerService.AddBorrowedBooks(borrowerId, bookId);
+            Console.WriteLine("Book borrowed successfully.");
         }
 
-        public static void update_book()
+        private void ReturnBorrow()
         {
-            Book.View_Books();
-
-            Console.Write("\nEnter id of book you want to edit : ");
-            var id = Int32.Parse(Console.ReadLine());
-
-            Book.Update_Book(id);
-
-            Book.View_Books();
+            int borrowerId = GetValidInt("Enter Borrower ID: ");
+            int bookId = GetValidInt("Enter Book ID to Return: ");
+            _borrowerService.ReturnBorrowedBook(borrowerId, bookId);
+            Console.WriteLine("Book returned successfully.");
         }
-
-        public static void delete_book(int authorid)
+        private void HandleAuthor()
         {
-            Author.Get_Author(authorid);
-
-            Console.Write("\nEnter id of book you want to delete : ");
-            var id = Int32.Parse(Console.ReadLine());
-
-            Book.Delete_Book(id);
-
-            Author.Get_Author(authorid);
-        }
-        #endregion
-
-        #region Borrower_Methods
-        public static void Addborrower()
-        {
-            using (var context = new AppDbContext())
+            int authorId = GetValidInt("\n\nPlease Enter Your ID: ");
+            var author = _authorService.GetAuthor(authorId);
+            if (author == null)
             {
-                var FName = "Mohamed";
-                var LName = "Sakran";
-
-                var borrowbooks = context.Books.Where(x => x.Title == "Book9" || x.Title == "Book1" || x.Title == "Book5").ToList();
-
-                var d = DateOnly.FromDateTime(DateTime.Now);
-
-                List<BorrowedBook> borrowedBooks = new List<BorrowedBook>
-                {
-                    new BorrowedBook(borrowbooks)
-                    {
-                       BorrowDate = d,
-                       Books = borrowbooks
-                    }
-                };
-
-                Borrower.Add_Borrower(FName, LName, borrowedBooks);
-                context.SaveChanges();
+                Console.WriteLine("\nInvalid ID.");
+                return;
             }
-        }
 
-        public static int Addnewborrower()
-        {
-            using (var context = new AppDbContext())
+            Console.Write("\n\nDo you want to Add Books or Remove (A/R): ");
+            char choice3 = char.ToUpper(Console.ReadKey().KeyChar);
+
+            switch (choice3)
             {
-                Console.Write("\n\nEnter new first name : ");
-                string Fname = Console.ReadLine();
-                Console.Write("\n\nEnter new last name : ");
-                string Lname = Console.ReadLine();
-
-                Borrower.Add_Borrower(Fname, Lname);
-
-                var id = context.Borrowers.FirstOrDefault(x => x.FName == Fname && x.LName == Lname).Id;
-                return id;
-            }
-        }
-
-        public static void Registerborrower()
-        {
-            using (var context = new AppDbContext())
-            {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("Welcome in our library ☺", 20);
-                Console.ResetColor();
-
-                Console.Write("\nPlease enter your first name : ");
-                var FName = Console.ReadLine();
-                Console.Write("\nPlease enter your last name : ");
-                var LName = Console.ReadLine();
-
-                Borrower.Add_Borrower(FName, LName);
-            }
-            Console.ReadKey();
-            Console.Clear();
-
-            Borrower.Get_Borrower();
-        }
-
-        public static void deleteborrower()
-        {
-            Borrower.Get_Borrower();
-
-            Console.Write("\n\nEnter id of borrower you want to delete : ");
-            var id = Int32.Parse(Console.ReadLine());
-
-            Console.Clear();
-            Borrower.Delete_Borrower(id);
-
-            Borrower.Get_Borrower();
-        }
-
-        public static int Login()
-        {
-            Console.Write("\n Hello\n\n Please enter your id to can login : ");
-            var id = Int32.Parse(Console.ReadLine());
-
-            Borrower.Get_Borrower(id);
-
-            return id;
-        }
-
-        public static void returnbook()
-        {
-            int borrowedid = Login();
-
-            Console.Write("\n\n Please enter id of book you want to return : ");
-            var id = Int32.Parse(Console.ReadLine());
-
-            Borrower.Return_Borrowed_Book(borrowedid, id);
-        }
-
-        #endregion
-        
-        public static void Script()
-        {
-            Console.Write("welcome do you have an id (Y/N) : ");
-            char choice1 = (char) Console.ReadKey().Key;
-
-            switch (choice1)
-            {
-                case 'Y':
-                    {
-                        Console.Write("\n\nYou are author or borrower (A/B) : ");
-                        char choice2 = (char)Console.ReadKey().Key;
-
-                        switch (choice2)
-                        {
-                            case 'A':
-                                {
-                                    Console.Write("\n\nPlease Enter Your Id : ");
-                                    int authorid = Int32.Parse(Console.ReadLine());
-                                    Author.Get_Author(authorid);
-
-                                    Console.Write("\n\nYou want to Add Books or Remove (A/R) : ");
-                                    char choice3 = (char)Console.ReadKey().Key;
-
-                                    switch (choice3)
-                                    {
-                                        case 'A':
-                                            {
-                                                Book.Add_Books(authorid);
-                                                Author.Get_Author(authorid);
-                                            }
-                                            break;
-
-                                        case 'R':
-                                            {
-                                                delete_book(authorid);
-                                            }
-                                            break;
-
-                                        default:
-                                            Console.WriteLine("\n\nSorry wrong choice");
-                                            break;
-                                    }
-                                }
-                                break;
-
-                            case 'B':
-                                {
-                                    Console.Write("\n\nPlease Enter Your Id : ");
-                                    int borrowerid = Int32.Parse(Console.ReadLine());
-                                    Borrower.Get_Borrower(borrowerid);
-
-                                    Console.Write("\n\nYou want to Borrow Books or Return (B/R) : ");
-                                    char choice3 = (char)Console.ReadKey().Key;
-
-                                    switch (choice3)
-                                    {
-                                        case 'B':
-                                            {
-                                                Book.View_Books();
-                                                Console.Write("\n\nPlese enter id of book you want to borrow : ");
-                                                int bookborrowid = Int32.Parse(Console.ReadLine());
-
-                                                Borrower.Add_BorrowedBooks(borrowerid, bookborrowid);
-                                                Borrower.Get_Borrower(borrowerid);
-                                            }
-                                            break;
-
-                                        case 'R':
-                                            {
-                                                Borrower.Get_Borrower(borrowerid);
-                                                Console.Write("\n\nPlese enter id of book you want to return : ");
-                                                int bookreturnid = Int32.Parse(Console.ReadLine());
-                                                Borrower.Return_Borrowed_Book(borrowerid,bookreturnid);
-
-                                                Borrower.Get_Borrower(borrowerid);
-                                            }
-                                            break;
-
-                                        default:
-                                            Console.WriteLine("\n\nSorry wrong choice");
-                                            break;
-                                    }
-                                }
-                                break;
-
-                            default:
-                                Console.WriteLine("\n\nSorry wrong choice");
-                                break;
-                        }
-
-                    }
+                case 'A':
+                    string title = GetString("\n\nEnter Book Title: ");
+                    _bookService.AddBook(authorId, title);
                     break;
-
-                case 'N':
-                    {
-                        Console.Write("\n\nYou want to register as Author or Borrower (A/B) : ");
-                        char choice4 = (char)Console.ReadKey().Key;
-
-                        switch (choice4)
-                        {
-                            case 'A':
-                                {
-                                    int newauthorid = Addnewauthor();
-
-                                    Console.Write("\n\nYou want to add Book (Y/N) : ");
-                                    char choice5 = (char)Console.ReadKey().Key;
-
-                                    switch (choice5)
-                                    {
-                                        case 'Y':
-                                            {
-                                                Book.Add_Books(newauthorid);
-                                                Author.Get_Author(newauthorid);
-                                            }
-                                            break;
-
-                                        case 'N':
-                                            break;
-                                        default:
-                                            Console.WriteLine("\n\nSorry wrong answer");
-                                            break;
-                                    }
-                                }
-                                break;
-
-                            case 'B':
-                                {
-                                    int newborrowerid = Addnewborrower();
-
-                                    Console.Write("\n\nYou want to Borrow Book (Y/N) : ");
-                                    char choice6 = (char)Console.ReadKey().Key;
-
-                                    switch (choice6)
-                                    {
-                                        case 'Y':
-                                            {
-                                                Book.View_Books();
-                                                Console.Write("\n\nPlese enter id of book you want to borrow : ");
-                                                int bookborrowid = Int32.Parse(Console.ReadLine());
-
-                                                Borrower.Add_BorrowedBooks(newborrowerid, bookborrowid);
-                                                Borrower.Get_Borrower(newborrowerid);
-                                            }
-                                            break;
-
-                                        case 'N':
-                                            break;
-                                        default:
-                                            Console.WriteLine("\n\nSorry wrong answer");
-                                            break;
-                                    }
-                                }
-                                break;
-                            default:
-                                Console.WriteLine("Sorry wrong Choice");
-                                break;
-                        }
-                    }
+                case 'R':
+                    int bookId = GetValidInt("\n\nEnter the ID of the book you want to delete: ");
+                    _bookService.DeleteBook(bookId);
                     break;
                 default:
-                    Console.WriteLine("\n\nSorry wrong Choice");
+                    Console.WriteLine("\nSorry, wrong choice.");
                     break;
             }
         }
 
+        private void HandleBorrower()
+        {
+            int borrowerId = GetValidInt("\n\nPlease Enter Your ID: ");
+            var borrower = _borrowerService.GetBorrower(borrowerId);
+            if (borrower == null)
+            {
+                Console.WriteLine("\nInvalid ID.");
+                return;
+            }
+
+            Console.Write("\n\nDo you want to Borrow Books or Return (B/R): ");
+            char choice3 = char.ToUpper(Console.ReadKey().KeyChar);
+
+            switch (choice3)
+            {
+                case 'B':
+                    int bookId = GetValidInt("\n\nPlease enter the ID of the book you want to borrow: ");
+                    _borrowerService.AddBorrowedBooks(borrowerId, bookId);
+                    break;
+                case 'R':
+                    bookId = GetValidInt("\n\nPlease enter the ID of the book you want to return: ");
+                    _borrowerService.ReturnBorrowedBook(borrowerId, bookId);
+                    break;
+                default:
+                    Console.WriteLine("\nSorry, wrong choice.");
+                    break;
+            }
+        }
+
+        private void RegisterNewAuthor()
+        {
+            string firstName = GetString("\n\nEnter new first name: ");
+            string lastName = GetString("\n\nEnter new last name: ");
+            _authorService.AddAuthor(firstName, lastName);
+        }
+
+        private void RegisterNewBorrower()
+        {
+            string firstName = GetString("\n\nEnter new first name: ");
+            string lastName = GetString("\n\nEnter new last name: ");
+            _borrowerService.AddBorrower(firstName, lastName);
+        }
+
+        private int GetValidInt(string prompt)
+        {
+            int result;
+            Console.Write(prompt);
+            while (!int.TryParse(Console.ReadLine(), out result))
+            {
+                Console.Write("Invalid input. " + prompt);
+            }
+            return result;
+        }
+
+        private string GetString(string prompt)
+        {
+            string? input;
+            do
+            {
+                Console.Write(prompt);
+                input = Console.ReadLine();
+                if (input == null)
+                {
+                    Console.WriteLine("Input cannot be null.");
+                }
+            } while (input == null);
+            return input;
+        }
     }
 }
