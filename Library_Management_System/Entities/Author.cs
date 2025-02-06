@@ -46,22 +46,15 @@ namespace Library_Management_System.Entities
         {
             using (var context = new AppDbContext())
             {
-                var authors = context.Authors
-                    .Include(x => x.Books)
-                    .ToList();
+                var authors = context.Authors.ToList();
                 Console.WriteLine("\n----Authors----\n");
+                Console.WriteLine("\n\t\t┌-----------┬------------┬------------┐");
+                Console.WriteLine($"\t\t│ Author Id │ First Name │ Last Name  │");
+                Console.WriteLine("\t\t│-----------│------------│------------│");
                 foreach (var item in authors)
                 {
-                    Console.WriteLine($"\nID : {item.Id,-3}, Name : {item.FullName,-17} ");
-
-                    Console.WriteLine("\n\t\t┌---------┬------------┬-------------┐");
-                    Console.WriteLine($"\t\t│ Book Id │ Book title │ Is borrowed │");
-                    Console.WriteLine("\t\t│---------│------------│-------------│");
-                    foreach (var book in item.Books)
-                    {
-                        Console.WriteLine($"\t\t│  {book.Id,-7}│   {book.Title,-8} │    {(book.IsBorrowed ? "Yes" : "No"),-8} │");
-                        Console.WriteLine("\t\t│---------│------------│-------------│");
-                    }
+                    Console.WriteLine($"\t\t│ {item.Id,-9} │  {item.FName,-10}│ {item.LName,-10} │");
+                    Console.WriteLine("\t\t│-----------│------------│------------│");
                 }
             }
         }
@@ -72,24 +65,18 @@ namespace Library_Management_System.Entities
             {
                 if (context.Authors.Any(x => x.Id == id))
                 {
-                    var author = context.Authors
-                        .Include(x => x.Books)
-                        .FirstOrDefault(x => x.Id == id);
-
-                    Console.WriteLine($"\n\nID : {author.Id,-3}, Name : {author.FullName,-17} ");
-
-                    Console.WriteLine("\n\t\t┌---------┬------------┬-------------┐");
-                    Console.WriteLine($"\t\t│ Book Id │ Book title │ Is borrowed │");
-                    Console.WriteLine("\t\t│---------│------------│-------------│");
-                    foreach (var book in author.Books)
-                    {
-                        Console.WriteLine($"\t\t│  {book.Id,-7}│   {book.Title,-8} │    {(book.IsBorrowed ? "Yes" : "No"),-8} │");
-                        Console.WriteLine("\t\t│---------│------------│-------------│");
-                    }
+                    var author = context.Authors.FirstOrDefault(x => x.Id == id);
+                    Console.WriteLine("\n----Author----\n");
+                    Console.WriteLine("\n\t\t┌---------┬------------┬------------┐");
+                    Console.WriteLine($"\t\t│ Author Id │ First Name │ Last Name │");
+                    Console.WriteLine("\t\t│-----------│------------│------------│");
+                    Console.WriteLine($"\t\t│ {author.Id,-9}│  {author.FName,-10} │   {author.LName,-10} │");
+                    Console.WriteLine("\t\t│-----------│------------│------------│");
                 }
                 else
-                    Console.WriteLine($"\n\nthere is no author have id {id}");
-
+                {
+                    Console.WriteLine($"\n\nThere is no author with ID {id}");
+                }
             }
         }
 
